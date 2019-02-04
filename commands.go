@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"net"
-	"net/url"
 	"os"
 	"strings"
+
+	"github.com/artemmikhalitsin/httpc/client"
 )
 
 // GetCommand handles carrying out
@@ -26,58 +25,8 @@ func GetCommand(opt CommonOptions, args []string) {
 	}
 	requestURL := args[0]
 
-	parsed, err := url.ParseRequestURI(requestURL)
-
-	if err != nil {
-		fmt.Println("Unable to parse request URL. " +
-			"Did you forget the protocol? (http://)")
-		os.Exit(1)
-	}
-
-	if parsed.Scheme != "http" {
-		fmt.Print("httpc only supports HTTP requests")
-	}
-
-	host := parsed.Host
-	if !strings.Contains(host, ":") {
-		// No port defined: use 80
-		host += ":80"
-	}
-	path := parsed.Path
-	if path == "" {
-		// No path defined: use "/"
-		path = "/"
-	}
-	if parsed.RawQuery != "" {
-		// Attach query if exists
-		path += "?" + parsed.RawQuery
-	}
-	// Resolve the TCP address
-	addr, err := net.ResolveTCPAddr("tcp", host)
-	if err != nil {
-		fmt.Println("Unable to resolve the given address")
-	}
-
-	// Open TCP connect
-	conn, err := net.DialTCP("tcp", nil, addr)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err != nil {
-		fmt.Println("Error establishing connection to " + host)
-	}
-
-	request := fmt.Sprintf("GET %s HTTP/1.0\n"+
-		"Host: %s\n\n", path, host)
-
-	fmt.Fprint(conn, request)
-
-	var buf bytes.Buffer
-	// Copy response into the buffer
-	io.Copy(&buf, conn)
-
-	fmt.Println(buf.String())
+	res, _ := client.Get(requestURL, opt.Headers)
+	fmt.Println(res)
 }
 
 // PostCommand handles carrying out
@@ -109,62 +58,6 @@ func PostCommand(opt CommonOptions, args []string) {
 
 	requestURL := args[0]
 
-	parsed, err := url.ParseRequestURI(requestURL)
-
-	if err != nil {
-		fmt.Println("Unable to parse request URL. " +
-			"Did you forget the protocol? (http://)")
-		os.Exit(1)
-	}
-
-	if parsed.Scheme != "http" {
-		fmt.Print("httpc only supports HTTP requests")
-	}
-
-	host := parsed.Host
-	if !strings.Contains(host, ":") {
-		// No port defined: use 80
-		host += ":80"
-	}
-	path := parsed.Path
-	if path == "" {
-		// No path defined: use "/"
-		path = "/"
-	}
-	if parsed.RawQuery != "" {
-		// Attach query if exists
-		path += "?" + parsed.RawQuery
-	}
-	// Resolve the TCP address
-	addr, err := net.ResolveTCPAddr("tcp", host)
-	if err != nil {
-		fmt.Println("Unable to resolve the given address")
-	}
-
-	// Open TCP connect
-	conn, err := net.DialTCP("tcp", nil, addr)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	if err != nil {
-		fmt.Println("Error establishing connection to " + host)
-	}
-
-	request := fmt.Sprintf("POST %s HTTP/1.0\r\n"+
-		"Host: %s\r\n", path, host)
-
-	var bodyBuffer bytes.Buffer
-	io.Copy(&bodyBuffer, body)
-
-	request += fmt.Sprintf("Content-Length: %d\r\n\r\n", bodyBuffer.Len())
-	request += fmt.Sprintf(bodyBuffer.String() + "\r\n")
-
-	fmt.Fprint(conn, request)
-
-	var buf bytes.Buffer
-	// Copy response into the buffer
-	io.Copy(&buf, conn)
-
-	fmt.Println(buf.String())
+	res, _ := client.Post(requestURL, opt.Headers, body)
+	fmt.Println(res)
 }
