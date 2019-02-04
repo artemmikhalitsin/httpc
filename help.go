@@ -71,7 +71,7 @@ func printPostHelp() {
 		"with the format 'key:value'.")
 	fmt.Printf("   %-14s %s\n", "-d string", "Associates an inline data to the "+
 		"body HTTP POST request.")
-	fmt.Printf("   %-14s %s\n", "-d string", "Associates the content of a file "+
+	fmt.Printf("   %-14s %s\n", "-f string", "Associates the content of a file "+
 		" to the body HTTP POST request.")
 	fmt.Println()
 	fmt.Println("Either [-d] or [-f] can be used but not both.")
