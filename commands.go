@@ -37,12 +37,10 @@ func GetCommand(opt CommonOptions, args []string) {
 
 	requestURL := args[0]
 
-	fullRes, _ := client.Get(requestURL, opt.Headers)
-	result := fullRes
+	response, _ := client.Get(requestURL, opt.Headers)
+	result := response.Raw
 	if !opt.Verbose {
-		// Non-verbose: Print only the  content
-		content := strings.Split(fullRes, "\r\n\r\n")
-		result = content[1]
+		result = response.Body
 	}
 
 	fmt.Fprintf(out, result)
@@ -91,13 +89,12 @@ func PostCommand(opt CommonOptions, args []string) {
 
 	requestURL := args[0]
 
-	fullRes, _ := client.Post(requestURL, opt.Headers, body)
-	result := fullRes
+	response, _ := client.Post(requestURL, opt.Headers, body)
+	result := response.Raw
 
 	if !opt.Verbose {
 		// Non-verbose: Print only the  content
-		content := strings.Split(fullRes, "\r\n\r\n")
-		result = content[1]
+		result = response.Body
 	}
 
 	fmt.Fprintf(out, result)

@@ -10,7 +10,7 @@ import (
 )
 
 // DoRequest performs a general request, where you can specify the method
-func DoRequest(method, uri string, headers headers.List, body io.Reader) (string, error) {
+func DoRequest(method, uri string, headers headers.List, body io.Reader) (*Response, error) {
 	// Parse URL
 	parsed, err := url.ParseRequestURI(uri)
 
@@ -46,18 +46,23 @@ func DoRequest(method, uri string, headers headers.List, body io.Reader) (string
 	req := NewRequest(method, host, path, headers, body)
 	// Write the request to the connection
 	res, err := conn.WriteRequest(req)
+	var response *Response
+
 	if err != nil {
-		return "", err
+		return response, err
 	}
-	return res, nil
+
+	response = NewResponse(res)
+
+	return response, nil
 }
 
 // Get performs a GET request and returns the response
-func Get(uri string, headers headers.List) (string, error) {
+func Get(uri string, headers headers.List) (*Response, error) {
 	return DoRequest("GET", uri, headers, nil)
 }
 
 // Post performs a POST request and returns the response
-func Post(uri string, headers headers.List, body io.Reader) (string, error) {
+func Post(uri string, headers headers.List, body io.Reader) (*Response, error) {
 	return DoRequest("POST", uri, headers, body)
 }
