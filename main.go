@@ -49,7 +49,8 @@ func main() {
 	case "help":
 		helpCommand.Parse(flag.Args())
 	default:
-		flag.PrintDefaults()
+		PrintUsage()
+		os.Exit(1)
 	}
 
 	if getCommand.Parsed() {
