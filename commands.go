@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"net"
+	"net/url"
 	"os"
+	"strings"
 )
 
 // GetCommand handles carrying out
@@ -19,7 +24,51 @@ func GetCommand(opt CommonOptions, args []string) {
 		fmt.Println("GET requests cannot include a body")
 		os.Exit(1)
 	}
-	fmt.Println("Command: get")
+	requestURL := args[0]
+
+	parsed, err := url.ParseRequestURI(requestURL)
+
+	if err != nil {
+		fmt.Println("Unable to parse request URL. " +
+			"Did you forget the protocol? (http://)")
+		os.Exit(1)
+	}
+
+	if parsed.Scheme != "http" {
+		fmt.Print("httpc only supports HTTP requests")
+	}
+
+	host := parsed.Host
+	if !strings.Contains(host, ":") {
+		// No port defined: use 80
+		host += ":80"
+	}
+	path := parsed.Path
+	if path == "" {
+		// No path defined: use "/"
+		path = "/"
+	}
+	if parsed.RawQuery != "" {
+		// Attach query if exists
+		path += "?" + parsed.RawQuery
+	}
+
+	// Open TCP connect
+	conn, err := net.Dial("tcp", host)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	request := fmt.Sprintf("GET %s HTTP/1.0\n"+
+		"Host: %s\n\n", path, host)
+
+	fmt.Fprint(conn, request)
+
+	var buf bytes.Buffer
+	// Copy response into the buffer
+	io.Copy(&buf, conn)
+
+	fmt.Println(buf.String())
 }
 
 // PostCommand handles carrying out
