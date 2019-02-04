@@ -65,8 +65,6 @@ func (c *Connection) WriteRequest(r *Request) (string, error) {
 	// Finish the request with carriage return
 	request += "\r\n"
 
-	fmt.Println(request)
-
 	_, err := fmt.Fprint(&c.Connection, request)
 
 	if err != nil {

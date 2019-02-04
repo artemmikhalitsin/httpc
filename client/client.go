@@ -59,5 +59,5 @@ func Get(uri string, headers headers.List) (string, error) {
 
 // Post performs a POST request and returns the response
 func Post(uri string, headers headers.List, body io.Reader) (string, error) {
-	return DoRequest("GET", uri, headers, body)
+	return DoRequest("POST", uri, headers, body)
 }
