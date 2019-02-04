@@ -23,20 +23,29 @@ func GetCommand(opt CommonOptions, args []string) {
 		fmt.Println("GET requests cannot include a body")
 		os.Exit(1)
 	}
+	out := os.Stdout
+	// If output file is specified, write there instead
+	if opt.OutputFile != "" {
+		file, err := os.Create(opt.OutputFile)
+		if err != nil {
+			fmt.Println("Error opening file for output")
+			os.Exit(1)
+		}
+		defer file.Close()
+		out = file
+	}
+
 	requestURL := args[0]
 
 	fullRes, _ := client.Get(requestURL, opt.Headers)
-	// Split into response details and content
-	res := strings.Split(fullRes, "\r\n\r\n")
-	content := res[1]
-
-	if opt.Verbose {
-		// Verbose: Print details and content
-		fmt.Println(fullRes)
-	} else {
-		// Non-verbose : Print only content
-		fmt.Println(content)
+	result := fullRes
+	if !opt.Verbose {
+		// Non-verbose: Print only the  content
+		content := strings.Split(fullRes, "\r\n\r\n")
+		result = content[1]
 	}
+
+	fmt.Fprintf(out, result)
 }
 
 // PostCommand handles carrying out
@@ -54,6 +63,18 @@ func PostCommand(opt CommonOptions, args []string) {
 		os.Exit(1)
 	}
 
+	out := os.Stdout
+	// If output file is specified, write there instead
+	if opt.OutputFile != "" {
+		file, err := os.Create(opt.OutputFile)
+		if err != nil {
+			fmt.Println("Error opening file for output")
+			os.Exit(1)
+		}
+		defer file.Close()
+		out = file
+	}
+
 	var body io.Reader
 	if opt.InlineData != "" {
 		body = strings.NewReader(opt.InlineData)
@@ -62,22 +83,22 @@ func PostCommand(opt CommonOptions, args []string) {
 		f, err := os.Open(opt.InputFile)
 		if err != nil {
 			fmt.Println("Error opening file" + opt.InputFile)
+			os.Exit(1)
 		}
+		defer f.Close()
 		body = f
 	}
 
 	requestURL := args[0]
 
 	fullRes, _ := client.Post(requestURL, opt.Headers, body)
-	// Split into response details and content
-	res := strings.Split(fullRes, "\r\n\r\n")
-	content := res[1]
+	result := fullRes
 
-	if opt.Verbose {
-		// Verbose: Print details and content
-		fmt.Println(fullRes)
-	} else {
-		// Non-verbose: Print just content
-		fmt.Println(content)
+	if !opt.Verbose {
+		// Non-verbose: Print only the  content
+		content := strings.Split(fullRes, "\r\n\r\n")
+		result = content[1]
 	}
+
+	fmt.Fprintf(out, result)
 }

@@ -14,6 +14,7 @@ type CommonOptions struct {
 	Headers    headers.List
 	InlineData string
 	InputFile  string
+	OutputFile string
 }
 
 func main() {
@@ -22,9 +23,10 @@ func main() {
 	flag.BoolVar(&common.Verbose, "v", false, "Verbose output")
 	flag.Var(&common.Headers, "h", "Request header in key:value format")
 	flag.StringVar(&common.InlineData, "d", "", "Inline data to be added as "+
-		" part of a POST request")
+		" body of a POST request")
 	flag.StringVar(&common.InputFile, "f", "", "Text file, the context of which"+
-		" should be added as a POST request body")
+		" should be added as body of a POST request")
+	flag.StringVar(&common.OutputFile, "o", "", "Filename to which the output is written to")
 
 	// Method command
 	helpCommand := flag.NewFlagSet("help", flag.ExitOnError)
